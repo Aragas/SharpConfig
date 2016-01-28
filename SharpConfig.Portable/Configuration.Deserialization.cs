@@ -4,31 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace SharpConfig
 {
     public partial class Configuration
     {
-        private static Configuration DeserializeBinary(BinaryReader reader, string filename)
-        {
-            if (string.IsNullOrEmpty(filename))
-                throw new ArgumentNullException("filename");
-
-            Configuration config = null;
-
-            using (var stream = File.OpenRead(filename))
-            {
-                config = DeserializeBinary(reader, stream);
-            }
-
-            return config;
-        }
-
         private static Configuration DeserializeBinary(BinaryReader reader, Stream stream)
         {
             if (stream == null)
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
 
             bool ownReader = false;
 
@@ -72,7 +56,7 @@ namespace SharpConfig
             finally
             {
                 if (ownReader)
-                    reader.Close();
+                    reader.Dispose();
             }
         }
 
@@ -90,16 +74,15 @@ namespace SharpConfig
 
             if (preCommentCount > 0)
             {
-                element.mPreComments = new List<Comment>(preCommentCount);
+                element._preComments = new List<Comment>(preCommentCount);
 
                 for (int i = 0; i < preCommentCount; i++)
                 {
                     char symbol = reader.ReadChar();
                     string commentValue = reader.ReadString();
-                    element.mPreComments.Add(new Comment(commentValue, symbol));
+                    element._preComments.Add(new Comment(commentValue, symbol));
                 }
             }
         }
-
     }
 }

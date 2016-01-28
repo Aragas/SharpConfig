@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SharpConfig
 {
@@ -12,5 +10,7 @@ namespace SharpConfig
     /// sections from objects and vice versa.
     /// </summary>
     public sealed class IgnoreAttribute : Attribute
-    { }
+    {
+
+    }
 }

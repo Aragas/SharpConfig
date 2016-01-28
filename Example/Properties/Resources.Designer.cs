@@ -65,12 +65,11 @@ namespace Example.Properties {
         ///# All settings that are below the section belong to it,
         ///# until another section is declared.
         ///[General]
-        ///CustomTypeArray = {{{1,2}}, {3,4}}
         ///SomeInteger = 10
         ///SomeFloat = 20.05
         ///
         ///# An array is identified by the brackets surrounding the value.
-        ///AnArray = {0,2,5,6}
+        ///AnArray = {0,2,5,7}
         ///
         ///# Another section called &quot;Video&quot;.
         ///[Video]
@@ -80,7 +79,8 @@ namespace Example.Properties {
         ///
         ///# Another section.
         ///[OtherProperties]
-        /// [rest of string was truncated]&quot;;.
+        ///
+        ///# A boolean can be represented by  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SampleCfg {
             get {

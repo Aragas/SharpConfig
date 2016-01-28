@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.IO;
+
 using SharpConfig;
 
 namespace Example
@@ -55,17 +55,15 @@ namespace Example
         {
             foreach (Section section in cfg)
             {
-                Console.WriteLine("[{0}]", section.Name);
+                Console.WriteLine($"[{section.Name}]");
 
                 foreach (Setting setting in section)
                 {
                     Console.Write("  ");
 
                     if (setting.IsArray)
-                    {
-                        Console.Write("[Array, {0} elements] ", setting.ArraySize);
-                    }
-
+                        Console.Write($"[Array, {setting.ArraySize} elements] ");
+                    
                     Console.WriteLine(setting.ToString());
                 }
 
@@ -105,7 +103,8 @@ namespace Example
             cfg["Person"]["Age"].SetValue(50);
             cfg["Person"]["SomeField"].SetValue(10);
 
-            cfg.SaveToFile(filename);
+            var stream = File.Create(filename);
+            cfg.SaveToStream(stream);
         }
 
         /// <summary>
@@ -181,10 +180,8 @@ namespace Example
             Console.Write(arrName + " = { ");
 
             for (int i = 0; i < arr.Length-1; i++)
-            {
-                Console.Write(arr[i].ToString() + ", ");
-            }
-
+                Console.Write(arr[i] + ", ");
+            
             Console.Write(arr[arr.Length - 1].ToString());
             Console.WriteLine(" }");
         }

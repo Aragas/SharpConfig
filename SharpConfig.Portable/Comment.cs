@@ -1,10 +1,6 @@
 ﻿// Copyright (c) 2013-2015 Cemalettin Dervis, MIT License.
 // https://github.com/cemdervis/SharpConfig
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace SharpConfig
 {
     /// <summary>
@@ -15,12 +11,12 @@ namespace SharpConfig
         /// <summary>
         /// The string value of the comment.
         /// </summary>
-        public string Value;
+        public readonly string Value;
 
         /// <summary>
         /// The delimiting symbol of the comment.
         /// </summary>
-        public char Symbol;
+        public readonly char Symbol;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Comment"/> class.
@@ -40,9 +36,6 @@ namespace SharpConfig
         /// <returns>
         /// A <see cref="T:System.String" /> containing a fully qualified type name.
         /// </returns>
-        public override string ToString()
-        {
-            return string.Format("{0} {1}", Symbol, Value ?? string.Empty);
-        }
+        public override string ToString() => $"{Symbol} {Value ?? string.Empty}";
     }
 }

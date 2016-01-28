@@ -1,23 +1,21 @@
 ﻿// Copyright (c) 2013-2015 Cemalettin Dervis, MIT License.
 // https://github.com/cemdervis/SharpConfig
 
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace SharpConfig
 {
     public partial class Configuration
     {
-        private static int mLineNumber;
+        private static int _lineNumber;
 
         // Parses a configuration from a source string.
         // This is the core parsing function.
         private static Configuration Parse(string source)
         {
             // Reset temporary fields.
-            mLineNumber = 0;
+            _lineNumber = 0;
 
             Configuration config = new Configuration();
             Section currentSection = null;
@@ -30,7 +28,7 @@ namespace SharpConfig
                 // Read until EOF.
                 while ((line = reader.ReadLine()) != null)
                 {
-                    mLineNumber++;
+                    _lineNumber++;
 
                     // Remove all leading / trailing white-spaces.
                     line = line.Trim();
@@ -72,16 +70,16 @@ namespace SharpConfig
 
                             throw new ParserException(string.Format(
                                 "The section '{0}' was already declared in the configuration.",
-                                currentSection.Name), mLineNumber);
+                                currentSection.Name), _lineNumber);
                         }
 
                         if (!IgnorePreComments && preComments.Count > 0)
                         {
-                            currentSection.mPreComments = new List<Comment>(preComments);
+                            currentSection._preComments = new List<Comment>(preComments);
                             preComments.Clear();
                         }
 
-                        config.mSections.Add(currentSection);
+                        config._sections.Add(currentSection);
                     }
                     else
                     {
@@ -94,7 +92,7 @@ namespace SharpConfig
                         {
                             throw new ParserException(string.Format(
                                 "The setting '{0}' has to be in a section.",
-                                setting.Name), mLineNumber);
+                                setting.Name), _lineNumber);
                         }
 
                         if (currentSection.Contains(setting.Name))
@@ -106,12 +104,12 @@ namespace SharpConfig
 
                             throw new ParserException(string.Format(
                                 "The setting '{0}' was already declared in the section.",
-                                setting.Name), mLineNumber);
+                                setting.Name), _lineNumber);
                         }
 
                         if (!IgnorePreComments && preComments.Count > 0)
                         {
-                            setting.mPreComments = new List<Comment>(preComments);
+                            setting._preComments = new List<Comment>(preComments);
                             preComments.Clear();
                         }
 
@@ -191,7 +189,7 @@ namespace SharpConfig
             int closingBracketIndex = line.IndexOf(']');
 
             if (closingBracketIndex < 0)
-                throw new ParserException("closing bracket missing.", mLineNumber);
+                throw new ParserException("closing bracket missing.", _lineNumber);
 
             // See if there are unwanted chars after the closing bracket.
             if ((line.Length - 1) > closingBracketIndex)
@@ -200,7 +198,7 @@ namespace SharpConfig
 
                 throw new ParserException(string.Format(
                     "unexpected token '{0}'", unwantedToken),
-                    mLineNumber);
+                    _lineNumber);
             }
 
             // Read the section name, and trim all leading / trailing white-spaces.
@@ -217,7 +215,7 @@ namespace SharpConfig
 
             if (indexOfAssignOp < 0)
             {
-                throw new ParserException("setting assignment expected.", mLineNumber);
+                throw new ParserException("setting assignment expected.", _lineNumber);
             }
 
             // Trim the setting name and value.
@@ -228,7 +226,7 @@ namespace SharpConfig
             // Check if non-null name / value is given.
             if (string.IsNullOrEmpty(settingName))
             {
-                throw new ParserException("setting name expected.", mLineNumber);
+                throw new ParserException("setting name expected.", _lineNumber);
             }
 
             if (settingValue == null)
@@ -236,6 +234,5 @@ namespace SharpConfig
 
             return new Setting(settingName, settingValue);
         }
-
     }
 }

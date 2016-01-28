@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SharpConfig
 {
@@ -14,16 +13,15 @@ namespace SharpConfig
     /// </summary>
     public abstract class ConfigurationElement
     {
-        private string mName;
-        private Comment? mComment;
-        internal List<Comment> mPreComments;
+        private string _name;
+        internal List<Comment> _preComments;
 
         internal ConfigurationElement(string name)
         {
             if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
-            mName = name;
+            _name = name;
         }
 
         /// <summary>
@@ -31,37 +29,24 @@ namespace SharpConfig
         /// </summary>
         public string Name
         {
-            get { return mName; }
+            get { return _name; }
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
 
-                mName = value;
+                _name = value;
             }
         }
 
         /// <summary>
         /// Gets or sets the comment of this element.
         /// </summary>
-        public Comment? Comment
-        {
-            get { return mComment; }
-            set { mComment = value; }
-        }
+        public Comment? Comment { get; set; }
 
         /// <summary>
         /// Gets the list of comments above this element.
         /// </summary>
-        public List<Comment> PreComments
-        {
-            get
-            {
-                if (mPreComments == null)
-                    mPreComments = new List<Comment>();
-
-                return mPreComments;
-            }
-        }
+        public List<Comment> PreComments => _preComments ?? (_preComments = new List<Comment>());
     }
 }

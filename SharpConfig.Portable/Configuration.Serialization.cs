@@ -2,7 +2,6 @@
 // https://github.com/cemdervis/SharpConfig
 
 using System;
-using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
@@ -10,21 +9,10 @@ namespace SharpConfig
 {
     public partial class Configuration
     {
-        private void Serialize(string filename, Encoding encoding)
-        {
-            if (string.IsNullOrEmpty(filename))
-                throw new ArgumentNullException("filename");
-
-            using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write))
-            {
-                Serialize(stream, encoding);
-            }
-        }
-
         private void Serialize(Stream stream, Encoding encoding)
         {
             if (stream == null)
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
 
             var sb = new StringBuilder();
 
@@ -35,12 +23,9 @@ namespace SharpConfig
             {
                 // Leave some space between this section and the element that is above,
                 // if this section has pre-comments and isn't the first section in the configuration.
-                if (!isFirstSection &&
-                    section.mPreComments != null && section.mPreComments.Count > 0)
-                {
+                if (!isFirstSection && section._preComments != null && section._preComments.Count > 0)
                     sb.AppendLine();
-                }
-
+                
                 sb.AppendLine(section.ToString(true));
 
                 // Write all settings.
@@ -48,11 +33,9 @@ namespace SharpConfig
                 {
                     // Leave some space between this setting and the element that is above,
                     // if this element has pre-comments.
-                    if (setting.mPreComments != null && setting.mPreComments.Count > 0)
-                    {
+                    if (setting._preComments != null && setting._preComments.Count > 0)
                         sb.AppendLine();
-                    }
-
+                    
                     sb.AppendLine(setting.ToString(true));
                 }
 
@@ -69,26 +52,13 @@ namespace SharpConfig
                 new StreamWriter(stream) : new StreamWriter(stream, encoding);
 
             using (writer)
-            {
                 writer.Write(sb.ToString());
-            }
-        }
-
-        private void SerializeBinary(BinaryWriter writer, string filename)
-        {
-            if (string.IsNullOrEmpty(filename))
-                throw new ArgumentNullException("filename");
-
-            using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write))
-            {
-                SerializeBinary(writer, stream);
-            }
         }
 
         private void SerializeBinary(BinaryWriter writer, Stream stream)
         {
             if (stream == null)
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
 
             bool ownWriter = false;
 
@@ -122,7 +92,7 @@ namespace SharpConfig
             finally
             {
                 if (ownWriter)
-                    writer.Close();
+                    writer.Dispose();
             }
         }
 
@@ -143,7 +113,7 @@ namespace SharpConfig
             // Note: do not access the PreComments property of element,
             // as it will lazily create a new List of pre-comments.
             // Access the private field instead.
-            var preComments = element.mPreComments;
+            var preComments = element._preComments;
             bool hasPreComments = (preComments != null && preComments.Count > 0);
 
             writer.Write(hasPreComments ? preComments.Count : 0);

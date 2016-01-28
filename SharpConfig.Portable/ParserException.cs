@@ -2,8 +2,6 @@
 // https://github.com/cemdervis/SharpConfig
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SharpConfig
 {
@@ -11,11 +9,11 @@ namespace SharpConfig
     /// Represents an error that occurred during
     /// the configuration parsing stage.
     /// </summary>
-    [Serializable]
     public sealed class ParserException : Exception
     {
-        internal ParserException(string message, int line)
-            : base(string.Format("Line {0}: {1}", line, message))
-        { }
+        internal ParserException(string message, int line) : base($"Line {line}: {message}")
+        {
+            
+        }
     }
 }

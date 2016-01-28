@@ -2,8 +2,8 @@
 // https://github.com/cemdervis/SharpConfig
 
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Reflection;
 
 namespace SharpConfig
 {
@@ -15,7 +15,7 @@ namespace SharpConfig
     {
         #region Fields
 
-        private string mRawValue;
+        private string _rawValue;
 
         #endregion
 
@@ -24,10 +24,9 @@ namespace SharpConfig
         /// <summary>
         /// Initializes a new instance of the <see cref="Setting"/> class.
         /// </summary>
-        public Setting(string name) :
-            this(name, string.Empty)
+        public Setting(string name) : this(name, string.Empty)
         {
-            mRawValue = string.Empty;
+            _rawValue = string.Empty;
         }
 
         /// <summary>
@@ -36,10 +35,9 @@ namespace SharpConfig
         ///
         /// <param name="name"> The name of the setting.</param>
         /// <param name="value">The value of the setting.</param>
-        public Setting(string name, string value) :
-            base(name)
+        public Setting(string name, string value) : base(name)
         {
-            mRawValue = value;
+            _rawValue = value;
         }
 
         #endregion
@@ -51,8 +49,8 @@ namespace SharpConfig
         /// </summary>
         public string StringValue
         {
-            get { return mRawValue; }
-            set { mRawValue = value; }
+            get { return _rawValue; }
+            set { _rawValue = value; }
         }
 
         /// <summary>
@@ -98,10 +96,7 @@ namespace SharpConfig
         /// <summary>
         /// Gets a value indicating whether this setting is an array.
         /// </summary>
-        public bool IsArray
-        {
-            get { return ArraySize >= 0; }
-        }
+        public bool IsArray => ArraySize >= 0;
 
         /// <summary>
         /// Gets the size of the array that this setting represents.
@@ -111,18 +106,14 @@ namespace SharpConfig
         {
             get
             {
-                if (string.IsNullOrEmpty(mRawValue))
-                {
+                if (string.IsNullOrEmpty(_rawValue))
                     return -1;
-                }
-
-                string value = mRawValue.Trim();
+                
+                string value = _rawValue.Trim();
 
                 if (value[0] != '{')
-                {
                     return -1;
-                }
-
+                
                 int arraySize = 0;
                 bool isInArrayBrackets = false;
                 int lastCommaIdx = 0;
@@ -134,19 +125,15 @@ namespace SharpConfig
                     if (ch == '{')
                     {
                         if (isInArrayBrackets)
-                        {
                             return -1;
-                        }
-
+                        
                         isInArrayBrackets = true;
                     }
                     else if (ch == '}')
                     {
                         if (pos != value.Length - 1)
-                        {
                             return -1;
-                        }
-
+                        
                         isInArrayBrackets = false;
                         break;
                     }
@@ -165,10 +152,8 @@ namespace SharpConfig
                         }
 
                         if (isElementEmpty)
-                        {
                             return -1;
-                        }
-
+                        
                         lastCommaIdx = pos;
                         ++arraySize;
                     }
@@ -190,14 +175,10 @@ namespace SharpConfig
                     }
 
                     if (isElementEmpty)
-                    {
                         return -1;
-                    }
                 }
                 else
-                {
                     return -1;
-                }
 
                 return arraySize + 1;
             }
@@ -217,18 +198,12 @@ namespace SharpConfig
             Type type = typeof(T);
 
             if (type.IsArray)
-            {
-                throw new InvalidOperationException(
-                    "To obtain an array value, use GetValueArray instead of GetValueTyped.");
-            }
-
-            if (this.IsArray)
-            {
-                throw new InvalidOperationException(
-                    "The setting represents an array. Use GetValueArray to obtain its value.");
-            }
-
-            return (T)ConvertValue(mRawValue, type);
+                throw new InvalidOperationException("To obtain an array value, use GetValueArray instead of GetValueTyped.");
+            
+            if (IsArray)
+                throw new InvalidOperationException("The setting represents an array. Use GetValueArray to obtain its value.");
+            
+            return (T)ConvertValue(_rawValue, type);
         }
 
         /// <summary>
@@ -239,23 +214,15 @@ namespace SharpConfig
         public object GetValueTyped(Type type)
         {
             if (type == null)
-            {
-                throw new ArgumentNullException("type");
-            }
-
+                throw new ArgumentNullException(nameof(type));
+            
             if (type.IsArray)
-            {
-                throw new InvalidOperationException(
-                    "To obtain an array value, use GetValueArray instead of GetValueTyped.");
-            }
-
-            if (this.IsArray)
-            {
-                throw new InvalidOperationException(
-                    "The setting represents an array. Use GetValueArray to obtain its value.");
-            }
-
-            return ConvertValue(mRawValue, type);
+                throw new InvalidOperationException("To obtain an array value, use GetValueArray instead of GetValueTyped.");
+            
+            if (IsArray)
+                throw new InvalidOperationException("The setting represents an array. Use GetValueArray to obtain its value.");
+            
+            return ConvertValue(_rawValue, type);
         }
 
         /// <summary>
@@ -269,23 +236,23 @@ namespace SharpConfig
         /// <returns></returns>
         public T[] GetValueArray<T>()
         {
-            int myArraySize = this.ArraySize;
+            int myArraySize = ArraySize;
 
             var values = new T[myArraySize];
             int i = 0;
 
             int elemIndex = 1;
-            int commaIndex = mRawValue.IndexOf(',');
+            int commaIndex = _rawValue.IndexOf(',');
 
             while (commaIndex >= 0)
             {
-                string sub = mRawValue.Substring(elemIndex, commaIndex - elemIndex);
+                string sub = _rawValue.Substring(elemIndex, commaIndex - elemIndex);
                 sub = sub.Trim();
 
                 values[i] = (T)ConvertValue(sub, typeof(T));
 
                 elemIndex = commaIndex + 1;
-                commaIndex = mRawValue.IndexOf(',', elemIndex + 1);
+                commaIndex = _rawValue.IndexOf(',', elemIndex + 1);
 
                 i++;
             }
@@ -293,9 +260,7 @@ namespace SharpConfig
             if (myArraySize > 0)
             {
                 // Read the last element.
-                values[i] = (T)ConvertValue(
-                    mRawValue.Substring(elemIndex, mRawValue.Length - elemIndex - 1),
-                    typeof(T));
+                values[i] = (T)ConvertValue(_rawValue.Substring(elemIndex, _rawValue.Length - elemIndex - 1), typeof(T));
             }
 
             return values;
@@ -318,17 +283,17 @@ namespace SharpConfig
             int i = 0;
 
             int elemIndex = 1;
-            int commaIndex = mRawValue.IndexOf(',');
+            int commaIndex = _rawValue.IndexOf(',');
 
             while (commaIndex >= 0)
             {
-                string sub = mRawValue.Substring(elemIndex, commaIndex - elemIndex);
+                string sub = _rawValue.Substring(elemIndex, commaIndex - elemIndex);
                 sub = sub.Trim();
 
                 values[i] = ConvertValue(sub, elementType);
 
                 elemIndex = commaIndex + 1;
-                commaIndex = mRawValue.IndexOf(',', elemIndex + 1);
+                commaIndex = _rawValue.IndexOf(',', elemIndex + 1);
 
                 i++;
             }
@@ -336,9 +301,7 @@ namespace SharpConfig
             if (myArraySize > 0)
             {
                 // Read the last element.
-                values[i] = ConvertValue(
-                    mRawValue.Substring(elemIndex, mRawValue.Length - elemIndex - 1),
-                    elementType);
+                values[i] = ConvertValue(_rawValue.Substring(elemIndex, _rawValue.Length - elemIndex - 1), elementType);
             }
 
             return values;
@@ -378,7 +341,7 @@ namespace SharpConfig
                         break;
                 }
             }
-            else if (type.BaseType == typeof(Enum))
+            else if (type.GetTypeInfo().BaseType == typeof(Enum))
             {
                 // It's possible that the value is something like:
                 // UriFormat.Unescaped
@@ -390,10 +353,8 @@ namespace SharpConfig
                 int indexOfLastDot = value.LastIndexOf('.');
 
                 if (indexOfLastDot >= 0)
-                {
                     value = value.Substring(indexOfLastDot + 1, value.Length - indexOfLastDot - 1).Trim();
-                }
-
+                
                 try
                 {
                     return Enum.Parse(type, value);
@@ -426,7 +387,7 @@ namespace SharpConfig
         /// <param name="value">The value to set.</param>
         public void SetValue<T>(T value)
         {
-            mRawValue = (value == null) ? string.Empty : value.ToString();
+            _rawValue = (value == null) ? string.Empty : value.ToString();
         }
 
         /// <summary>
@@ -437,19 +398,15 @@ namespace SharpConfig
         public void SetValue<T>(T[] values)
         {
             if (values == null)
-            {
-                mRawValue = string.Empty;
-            }
+                _rawValue = string.Empty;
             else
             {
                 var strings = new string[values.Length];
 
                 for (int i = 0; i < values.Length; i++)
-                {
                     strings[i] = values[i].ToString();
-                }
-
-                mRawValue = string.Format("{{{0}}}", string.Join(",", strings));
+                
+                _rawValue = $"{{{string.Join(",", strings)}}}";
             }
         }
 
@@ -460,10 +417,7 @@ namespace SharpConfig
         /// <summary>
         /// Gets a string that represents the setting, not including comments.
         /// </summary>
-        public override string ToString()
-        {
-            return ToString(false);
-        }
+        public override string ToString() => ToString(false);
 
         /// <summary>
         /// Gets a string that represents the setting.
@@ -474,34 +428,30 @@ namespace SharpConfig
         {
             if (includeComment)
             {
-                bool hasPreComments = mPreComments != null && mPreComments.Count > 0;
+                bool hasPreComments = _preComments != null && _preComments.Count > 0;
 
                 string[] preCommentStrings = hasPreComments ?
-                    mPreComments.ConvertAll(c => c.ToString()).ToArray() : null;
+                    _preComments.Select(c => c.ToString()).ToArray() : null;
 
                 if (Comment != null && hasPreComments)
                 {
                     // Include inline comment and pre-comments.
-                    return string.Format("{0}\n{1}={2} {3}",
-                        string.Join(Environment.NewLine, preCommentStrings),
-                        Name, mRawValue, Comment.ToString());
+                    return $"{string.Join(Environment.NewLine, preCommentStrings)}\n{Name}={_rawValue} {Comment}";
                 }
                 else if (Comment != null)
                 {
                     // Include only the inline comment.
-                    return string.Format("{0}={1} {2}", Name, mRawValue, Comment.ToString());
+                    return $"{Name}={_rawValue} {Comment}";
                 }
                 else if (hasPreComments)
                 {
                     // Include only the pre-comments.
-                    return string.Format("{0}\n{1}={2}",
-                        string.Join(Environment.NewLine, preCommentStrings),
-                        Name, mRawValue);
+                    return $"{string.Join(Environment.NewLine, preCommentStrings)}\n{Name}={_rawValue}";
                 }
             }
 
             // In every other case, include just the assignment in the string.
-            return string.Format("{0}={1}", Name, mRawValue);
+            return $"{Name}={_rawValue}";
         }
 
         #endregion
