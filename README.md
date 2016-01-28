@@ -1,5 +1,7 @@
 ![sharpconfig_logo.png](sharpconfig_logo.png)
 
+This is a PCL version of SharpConfig. File interaction deleted, only Stream based left. Not properly tested Object serializing/deserialising, it used only Instance and Public Properties/Fields, now it should parse any. Should be fixed.
+
 SharpConfig is an easy-to-use CFG/INI configuration library for .NET.
 
 You can use SharpConfig in your .NET applications to add the functionality
@@ -79,9 +81,7 @@ Saving a Configuration
 ---
 
 ```csharp
-myConfig.SaveToFile("myConfig.cfg");        // Save to a text-based file.
 myConfig.SaveToStream(myStream);            // Save to a text-based stream.
-myConfig.SaveToBinaryFile("myConfig.cfg");  // Save to a binary file.
 myConfig.SaveToBinaryStream(myStream);      // Save to a binary stream.
 ```
 
